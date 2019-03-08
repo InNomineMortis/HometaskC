@@ -1,1 +1,1 @@
-# ИЗ по С/С++
+# HometaskC Individual task
