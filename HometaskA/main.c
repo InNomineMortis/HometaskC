@@ -1,24 +1,36 @@
+/* Пученков Дмитрий
+ * АПО13
+ * Составить программу для перевода чисел из системы счисления по основанию P в систему счисления по основанию Q, где 2 меньше или равно Q меньше P меньше или равно 36.
+Значения P, Q и строковое представление S числа в исходной системе счисления вводятся с клавиатуры в следующем порядке:
+P Q S
+
+S не выходит за границы size_t.
+
+Процедура перевода не может использовать соответствующей функции системной библиотеки и должна быть оформлена в виде отдельной функции, на вход которой подаются значения P, Q и S, размещенные в динамической памяти.
+На выход функция должна возвращать строковое представление S1 числа в целевой системе счисления.
+
+Программа должна уметь обрабатывать ошибки во входных данных.
+В случае возникновения ошибки нужно вывести в поток стандартного вывода сообщение "[error]" (без кавычек) и завершить выполнение программы.
+
+ВАЖНО! Программа в любом случае должна возвращать 0. Не пишите return -1, exit(1) и т.п. Даже если обнаружилась какая-то ошибка, все равно необходимо вернуть 0! (и напечатать [error] в stdout). */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
-char *Shift(int FirstBase, int SecondBase, char *);
 
 char *GetLine();
 
-char SymbShift(int FirsBase, int SecondBase, char *str);
+char SymbShift(int FirstBase, int SecondBase, char *str);
 
-char *SymbConvert(int FirsBase, int SecondBase, char *str);
+char *SymbConvert(int FirstBase, int SecondBase, char *str);
 
-char *ShiftTen(int SecondBase, const char *str);
+bool zero(const char *str);
 
-char *ShiftTenInt(int SecondBase, long long Number);
-
-bool zero(char *str);
+bool InputCheck(char *str, int FirstBase, int SecondBase);
 
 char Numbers[36] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
 
 int main() {
     int P; // Input number system
@@ -27,14 +39,15 @@ int main() {
     char *Line = NULL;
     Line = GetLine();
     char *str = NULL;
-    //str = Shift(P, Q, Line);
-    str = SymbConvert(P, Q, Line);
-    free(Line);
-    int i = 0;
-    while (str[i] != '\0')
-        i++;
-    for (i = i - 1; i >= 0; i--)
-        printf("%c", str[i]);
+    if (InputCheck(Line, P, Q)) {
+        str = SymbConvert(P, Q, Line);
+        free(Line);
+        int i = 0;
+        while (str[i] != '\0')
+            i++;
+        for (i = i - 1; i >= 0; i--)
+            printf("%c", str[i]);
+    }
     free(str);
     return 0;
 }
@@ -50,15 +63,20 @@ char *GetLine() {
     size_t BestInp = 1;
     size_t i = 0, j = 0;
     while (fgets(Buffer, Length, stdin)) {
-        while (Buffer[i] != '\0') {
+        while (Buffer[i] != '\0' && Buffer[i] != '\n') {
+            if ((Buffer[i] < '0' || (Buffer[i] > '9' && Buffer[i] < 'A') || (Buffer[i] > 'Z' && Buffer[i] < 'a') ||
+                 Buffer[i] > 'z') && Buffer[i] != ' ') {
+                printf("[error]");
+                exit(0);
+            }
             i++;
             if (i == 30)
                 break;
         }
         NumberCharacters = i;
         CurrentInp += NumberCharacters;
-        if (Buffer[NumberCharacters] == '\0') {
-            FinalInp = malloc(NumberCharacters + 1);
+        if (Buffer[NumberCharacters] == '\0' || Buffer[NumberCharacters] == '\n') {
+            FinalInp = malloc(NumberCharacters + 2);
             FinalInp[0] = '\0';
             for (i = 0; FinalInp[i] != '\0'; i++);
             for (j = 0; Buffer[j] != '\0'; j++)
@@ -92,69 +110,6 @@ char *GetLine() {
     return FinalInp;
 }
 
-char *Shift(int FirstBase, int SecondBase, char *str) {
-    char *Num = NULL;
-    if (FirstBase == 10)
-        Num = ShiftTen(SecondBase, str);
-    else {
-        long long Buffer = 0;
-        int NumberCharacters = 0;
-        int current = 0;
-        int Dec = 0;
-        int i = 0, j = 0;
-        while (str[i] != '\0')                                      //Количество элементов без Strlen
-            i++;
-        for (int x = i - 1; x >= 0; x--) {
-            Dec = str[x];
-            if ((47 < Dec) && (Dec < 58))
-                Dec -= 48;
-            else if ((96 < Dec) && (Dec < 123))
-                Dec -= 87;
-            else if ((64 < Dec) && (Dec < 91))
-                Dec -= 55;
-            else
-                Dec = -1;
-            if (Dec >= 0) {
-                current = Dec;
-                j = NumberCharacters;
-                while (j > 0) {
-                    current *= FirstBase;
-                    j--;
-                }
-                Buffer += current;
-                NumberCharacters++;
-            }
-        }
-        if (SecondBase != 10)
-            Num = ShiftTenInt(SecondBase, Buffer);
-        else {
-            size_t it = 0;
-            long long numeral = Buffer;
-            while (numeral > 0) {
-                it++;
-                numeral /= 10;
-            }
-            char Numb[it + 1];
-            size_t z = 0;
-            while (Buffer > 0) {
-                numeral = Buffer % 10;
-                Numb[z] = (char) (numeral + 48);
-                Buffer /= 10;
-                z++;
-            }
-            Numb[z] = '\0';
-            Num = malloc(z + 1);
-            Num[0] = '\0';
-            int j = 0;
-            for (i = 0; Num[i] != '\0'; i++);
-            for (j = 0; Numb[j] != '\0'; j++)
-                Num[i + j] = Numb[j];
-            Num[z] = '\0';
-        }
-    }
-    return Num;
-}
-
 char *ShiftTen(int SecondBase, const char *str) {
     char Buff[32];
     Buff[0] = '\0';
@@ -186,51 +141,15 @@ char *ShiftTen(int SecondBase, const char *str) {
     return Num;
 }
 
-char *ShiftTenInt(int SecondBase, long long Number) {
-    char *Num = NULL;
-    char Buff[32];
-    Buff[0] = '\0';
-    int NumberCharacters = 0;
-    size_t BestInp = 0;
-    int i = 0, j = 0;
-    long long inp = 0;
-    while (Number >= SecondBase) {
-        if (NumberCharacters >= BestInp) {
-            BestInp += 32;
-            Num = realloc(Num, BestInp);
-            Num[0] = '\0';
-            Buff[i + 1] = '\0';
-            for (i = 0; Num[i] != '\0'; i++);
-            for (j = 0; Buff[j] != '\0'; j++)
-                Num[i + j] = Buff[j];
-            Num[i + j] = '\0';
-            i = 0;
-        }
-        inp = Number % SecondBase;
-        Buff[i] = Numbers[inp];
-        Number /= SecondBase;
-        i++;
-        NumberCharacters++;
-    }
-    Buff[i] = Numbers[Number];
-    Buff[i + 1] = '\0';
-    Num[j] = '\0';
-    for (i = 0; Num[i] != '\0'; i++);
-    for (j = 0; Buff[j] != '\0'; j++)
-        Num[i + j] = Buff[j];
-    Num[i + j] = '\0';
-    return Num;
-}
-
 char SymbShift(int FirstBase, int SecondBase, char *str) {
     int tmp = 0;
-    int len = 1;
+    int len = 0;
     char String;
-    while (str[len] != '\0')
+    while (str[len] != '\0' && str[len] != '\n')
         len++;
     len--;
     int Dec = 0;
-    for (int i = 0; i < len; i++) {
+    for (int i = 1; i <= len; i++) {
         Dec = str[i];
         if ((47 < Dec) && (Dec < 58))
             Dec -= 48;
@@ -259,21 +178,54 @@ char *SymbConvert(int FirstBase, int SecondBase, char *str) {
     size_t size = 1;
     int i = 0;
     do {
-        NewStr = realloc(NewStr, i);
+        NewStr = realloc(NewStr, size + 1);
         NewStr[i] = SymbShift(FirstBase, SecondBase, str);
         i++;
         size++;
     } while (!zero(str));
+    NewStr[size - 1] = '\0';
     return NewStr;
 }
 
-bool zero(char *str) {
-    int len = 1;
-    while (str[len] != '\0')
+bool zero(const char *str) {
+    int len = 0;
+    while (str[len] != '\0' && str[len] != '\n')
         len++;
     len--;
-    for (int i = 1; i < len; i++)
+    for (int i = 1; i <= len; i++)
         if (str[i] != '0')
             return false;
+    return true;
+}
+
+bool InputCheck(char *str, int FirstBase, int SecondBase) {
+    int i = 0;
+    if (FirstBase < SecondBase) {
+        printf("[error]");
+        exit(0);
+    }
+    if (SecondBase < 2 || FirstBase > 36){
+        printf("[error]");
+        exit(0);
+    }
+    size_t len = 0;
+    while (str[len] != '\0' && str[len] != '\n')
+        len++;
+    len--;
+    char tmp[len];
+    while (str[i] != '\0' && str[i] != '\n') {
+        if (str[i] > 'a' && str[i] < 123) {
+            tmp[i] = str[i] - 32;
+            if (tmp[i] > Numbers[FirstBase - 1]) {
+                printf("[error]");
+                exit(0);
+            }
+        } else if ((str[i] > 64) && (str[i] < 91))
+            if (str[i] > Numbers[FirstBase - 1]) {
+                printf("[error]");
+                exit(0);
+            }
+        i++;
+    }
     return true;
 }
