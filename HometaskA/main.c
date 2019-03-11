@@ -60,7 +60,7 @@ char *GetLine() {
     char *FinalInp = NULL;
     size_t NumberCharacters = 0;
     size_t CurrentInp = 0;
-    size_t BestInp = 1;
+    size_t BestInp = 31;
     size_t i = 0, j = 0;
     while (fgets(Buffer, Length, stdin)) {
         while (Buffer[i] != '\0' && Buffer[i] != '\n') {
@@ -85,7 +85,7 @@ char *GetLine() {
             break;
         }
         if (CurrentInp >= BestInp) {                 // Reallocating memory if needed
-            BestInp += Iter;
+            BestInp ++;
             FinalInp = realloc(FinalInp, BestInp);
             Buffer[i] = '\0';
             FinalInp[0] = '\0';
