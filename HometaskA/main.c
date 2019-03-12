@@ -85,7 +85,7 @@ char *GetLine() {
             break;
         }
         if (CurrentInp >= BestInp) {                 // Reallocating memory if needed
-            BestInp ++;
+            BestInp++;
             FinalInp = realloc(FinalInp, BestInp);
             Buffer[i] = '\0';
             FinalInp[0] = '\0';
@@ -204,7 +204,7 @@ bool InputCheck(char *str, int FirstBase, int SecondBase) {
         printf("[error]");
         exit(0);
     }
-    if (SecondBase < 2 || FirstBase > 36){
+    if (SecondBase < 2 || FirstBase > 36) {
         printf("[error]");
         exit(0);
     }
