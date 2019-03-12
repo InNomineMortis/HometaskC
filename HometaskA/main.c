@@ -100,7 +100,7 @@ char *GetLine() {
             if (FinalInp)
                 free(FinalInp);
             printf("[error]\n");
-            exit(0);                                // In case there is Input Error, we stop program with exit + std::Error
+            exit(0);
         }
     }
     if (FinalInp == NULL) {
@@ -108,37 +108,6 @@ char *GetLine() {
         FinalInp[0] = '\0';
     }
     return FinalInp;
-}
-
-char *ShiftTen(int SecondBase, const char *str) {
-    char Buff[32];
-    Buff[0] = '\0';
-    int NewNum = 0;
-    int i = 0, j = 0;
-    size_t len = 1;
-    while (str[len] != '\0')
-        len++;
-    len--;
-    for (i = 1; (i != len + 1) && str[i] >= '0' && str[i] <= '9'; i++) {
-        NewNum = (NewNum * 10) + (str[i] - '0');
-    }
-    i = 0;
-    char *Num;
-    Num = malloc(sizeof(len));
-    Num[0] = '\0';
-    while (NewNum >= SecondBase) {
-        Buff[i] = Numbers[NewNum % SecondBase];
-        NewNum /= SecondBase;
-        i++;
-    }
-    Buff[i] = Numbers[NewNum];
-    Buff[i + 1] = '\0';
-    Num[0] = '\0';
-    for (i = 0; Num[i] != '\0'; i++);
-    for (j = 0; Buff[j] != '\0'; j++)
-        Num[i + j] = Buff[j];
-    Num[i + j] = '\0';
-    return Num;
 }
 
 char SymbShift(int FirstBase, int SecondBase, char *str) {
